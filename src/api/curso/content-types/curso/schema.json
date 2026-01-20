@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cursos",
+  "info": {
+    "singularName": "curso",
+    "pluralName": "cursos",
+    "displayName": "Curso",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "nome": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "descricao": {
+      "type": "richtext",
+      "required": true
+    },
+    "duracao": {
+      "type": "string",
+      "required": true
+    },
+    "area": {
+      "type": "string",
+      "required": true
+    },
+    "vagas": {
+      "type": "integer",
+      "required": true
+    },
+    "imagem": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
