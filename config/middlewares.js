@@ -20,7 +20,8 @@ module.exports = [
       origin: [
         'https://site-escola-five-sand.vercel.app',
         'http://localhost:3000',
-        'http://localhost:3001'
+        'http://localhost:3001',
+        'https://strapi-final-funcional.onrender.com' // ADICIONE ESTA LINHA!
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
