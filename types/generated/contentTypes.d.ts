@@ -773,26 +773,17 @@ export interface ApiCursoCurso extends Schema.CollectionType {
   info: {
     singularName: 'curso';
     pluralName: 'cursos';
-    displayName: 'Curso';
-    description: '';
+    displayName: 'curso';
   };
   options: {
     draftAndPublish: true;
   };
-  pluginOptions: {
-    'content-manager': {
-      visible: true;
-    };
-    'content-type-builder': {
-      visible: true;
-    };
-  };
   attributes: {
-    nome: Attribute.String & Attribute.Required & Attribute.Unique;
-    descricao: Attribute.RichText & Attribute.Required;
-    duracao: Attribute.String & Attribute.Required;
-    area: Attribute.String & Attribute.Required;
-    vagas: Attribute.Integer & Attribute.Required;
+    ab_nome: Attribute.String;
+    es_descricao: Attribute.Blocks & Attribute.Required;
+    ab_duracao: Attribute.String;
+    ab_area: Attribute.String;
+    vagas: Attribute.BigInteger;
     imagem: Attribute.Media;
     ativo: Attribute.Boolean & Attribute.DefaultTo<true>;
     createdAt: Attribute.DateTime;
@@ -818,25 +809,16 @@ export interface ApiEventoEvento extends Schema.CollectionType {
   info: {
     singularName: 'evento';
     pluralName: 'eventos';
-    displayName: 'Evento';
-    description: '';
+    displayName: 'evento';
   };
   options: {
     draftAndPublish: true;
   };
-  pluginOptions: {
-    'content-manager': {
-      visible: true;
-    };
-    'content-type-builder': {
-      visible: true;
-    };
-  };
   attributes: {
-    titulo: Attribute.String & Attribute.Required & Attribute.Unique;
-    descricao: Attribute.RichText & Attribute.Required;
+    titulo: Attribute.String & Attribute.Required;
+    descricao: Attribute.Blocks & Attribute.Required;
     data: Attribute.Date & Attribute.Required;
-    local: Attribute.String & Attribute.Required;
+    local: Attribute.String;
     imagem: Attribute.Media;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
@@ -861,26 +843,17 @@ export interface ApiNoticiaNoticia extends Schema.CollectionType {
   info: {
     singularName: 'noticia';
     pluralName: 'noticias';
-    displayName: 'Noticia';
-    description: '';
+    displayName: 'noticia';
   };
   options: {
     draftAndPublish: true;
   };
-  pluginOptions: {
-    'content-manager': {
-      visible: true;
-    };
-    'content-type-builder': {
-      visible: true;
-    };
-  };
   attributes: {
-    titulo: Attribute.String & Attribute.Required & Attribute.Unique;
-    conteudo: Attribute.RichText & Attribute.Required;
+    titulo: Attribute.String & Attribute.Required;
+    conteudo: Attribute.Blocks & Attribute.Required;
     data_publicacao: Attribute.Date & Attribute.Required;
     imagem: Attribute.Media;
-    publicado: Attribute.Boolean & Attribute.DefaultTo<true>;
+    publicado: Attribute.Boolean & Attribute.DefaultTo<false>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

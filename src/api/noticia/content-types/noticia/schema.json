@@ -4,28 +4,19 @@
   "info": {
     "singularName": "noticia",
     "pluralName": "noticias",
-    "displayName": "Noticia",
-    "description": ""
+    "displayName": "noticia"
   },
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {
-    "content-manager": {
-      "visible": true
-    },
-    "content-type-builder": {
-      "visible": true
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "titulo": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "conteudo": {
-      "type": "richtext",
+      "type": "blocks",
       "required": true
     },
     "data_publicacao": {
@@ -33,13 +24,18 @@
       "required": true
     },
     "imagem": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
       "type": "media",
-      "multiple": false,
-      "allowedTypes": ["images"]
+      "multiple": false
     },
     "publicado": {
       "type": "boolean",
-      "default": true
+      "default": false
     }
   }
 }

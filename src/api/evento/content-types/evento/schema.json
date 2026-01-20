@@ -4,28 +4,19 @@
   "info": {
     "singularName": "evento",
     "pluralName": "eventos",
-    "displayName": "Evento",
-    "description": ""
+    "displayName": "evento"
   },
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {
-    "content-manager": {
-      "visible": true
-    },
-    "content-type-builder": {
-      "visible": true
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "titulo": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "descricao": {
-      "type": "richtext",
+      "type": "blocks",
       "required": true
     },
     "data": {
@@ -33,13 +24,17 @@
       "required": true
     },
     "local": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "imagem": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
       "type": "media",
-      "multiple": false,
-      "allowedTypes": ["images"]
+      "multiple": false
     }
   }
 }
