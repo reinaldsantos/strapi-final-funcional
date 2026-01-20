@@ -7,10 +7,9 @@ module.exports = [
         useDefaults: true,
         directives: {
           'connect-src': ["'self'", 'https:'],
-          'img-src': ["'self'", 'data:', 'blob:', 'https://strapi-final-funcional.onrender.com'],
-          'media-src': ["'self'", 'data:', 'blob:', 'https://strapi-final-funcional.onrender.com'],
-          'script-src': ["'self'", "'unsafe-inline'"],
-          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': ["'self'", 'data:', 'blob:', 'market-assets.strapi.io'],
+          'media-src': ["'self'", 'data:', 'blob:', 'market-assets.strapi.io'],
+          upgradeInsecureRequests: null,
         },
       },
     },
@@ -19,10 +18,9 @@ module.exports = [
     name: 'strapi::cors',
     config: {
       origin: [
-        'http://localhost:5173',
+        'https://site-escola-five-sand.vercel.app',
         'http://localhost:3000',
-        'http://localhost:8080',
-        'https://strapi-final-funcional.onrender.com'
+        'http://localhost:3001'
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
