@@ -1,4 +1,4 @@
-﻿// config/database.js - PARA LOCAL (SQLITE)
+﻿// config/database-local.js - SQLITE CORRETO
 module.exports = ({ env }) => ({
   connection: {
     client: 'sqlite',
