@@ -47,4 +47,12 @@ module.exports = [
   },
   'strapi::favicon',
   'strapi::public',
+  
+  // 🔥 🔥 🔥 ADICIONE ESTA PARTE NO FINAL 🔥 🔥 🔥
+  {
+    name: 'global::nuclear-protection',
+    config: {
+      enabled: true,
+    },
+  },
 ];
