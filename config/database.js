@@ -1,9 +1,26 @@
-﻿module.exports = {
-  connection: {
-    client: "sqlite",
+﻿const { parse } = require('pg-connection-string');
+
+module.exports = ({ env }) => {
+  // SEMPRE usar PostgreSQL, NUNCA SQLite
+  const config = parse(env('DATABASE_URL'));
+  
+  return {
     connection: {
-      filename: ".tmp/data.db"
+      client: 'postgres',
+      connection: {
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        user: config.user,
+        password: config.password,
+        ssl: { rejectUnauthorized: false },
+      },
+      pool: {
+        min: 0,
+        max: 10,
+        acquireTimeoutMillis: 60000,
+        idleTimeoutMillis: 30000,
+      },
     },
-    useNullAsDefault: true
-  }
+  };
 };
