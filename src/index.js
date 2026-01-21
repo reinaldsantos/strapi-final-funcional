@@ -1,165 +1,157 @@
-'use strict';
+﻿'use strict';
 
 module.exports = {
-  /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
-   *
-   * This gives you an opportunity to extend code.
-   */
-  register(/*{ strapi }*/) {},
-
-  /**
-   * An asynchronous bootstrap function that runs before
-   * your application gets started.
-   *
-   * This gives you an opportunity to set up your data model,
-   * run jobs, or perform some special logic.
-   */
   async bootstrap({ strapi }) {
-    console.log('🚀 Iniciando Strapi com SISTEMA NUCLEAR...');
+    console.log('🚀 Inicializando Strapi com Sistema Nuclear corrigido...');
     
-    // ==================== SISTEMA NUCLEAR ====================
-    // Proteção contra perda de dados no Render
+    // 🔥 SISTEMA DE PERMISSÕES PERMANENTE
+    try {
+      // 1. Garantir role Public
+      let publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+        where: { type: 'public' }
+      });
+      
+      if (!publicRole) {
+        console.log('🔧 Criando role Public...');
+        publicRole = await strapi.db.query('plugin::users-permissions.role').create({
+          data: {
+            name: 'Public',
+            type: 'public',
+            description: 'Default role given to unauthenticated user.'
+          }
+        });
+      }
+      
+      // 2. Configurar permissões para as coleções EXISTENTES
+      // Use os nomes CORRETOS no singular (conforme seus logs)
+      const colecoes = [
+        'api::noticia.noticia',    // SINGULAR (conforme log)
+        'api::evento.evento',      // SINGULAR
+        'api::curso.curso'         // SINGULAR
+      ];
+      
+      for (const colecao of colecoes) {
+        try {
+          // Verificar se a coleção existe
+          const model = strapi.getModel(colecao);
+          if (!model) {
+            console.log(\⚠️  Coleção \ não encontrada\);
+            continue;
+          }
+          
+          // Configurar permissões find e findOne
+          const permissoes = ['find', 'findOne'];
+          
+          for (const acao of permissoes) {
+            const acaoCompleta = \\.\\;
+            
+            const existe = await strapi.db.query('plugin::users-permissions.permission').findOne({
+              where: {
+                action: acaoCompleta,
+                role: publicRole.id
+              }
+            });
+            
+            if (!existe) {
+              await strapi.db.query('plugin::users-permissions.permission').create({
+                data: {
+                  action: acaoCompleta,
+                  role: publicRole.id
+                }
+              });
+              console.log(\✅ Permissão criada: \\);
+            }
+          }
+          
+        } catch (error) {
+          console.log(\⚠️  Erro em \:\, error.message);
+        }
+      }
+      
+      console.log('🔒 Permissões configuradas com SUCESSO!');
+      console.log('🎉 Agora NUNCA MAIS vão sumir!');
+      
+    } catch (error) {
+      console.log('⚠️  Erro no sistema de permissões:', error.message);
+    }
     
-    // 1. Função para garantir permissões públicas
-    const garantirPermissoesPublicas = async () => {
+    // 🔄 SISTEMA NUCLEAR DE VERIFICAÇÃO PERIÓDICA
+    setInterval(async () => {
       try {
-        console.log('🛡️  Verificando permissões públicas...');
+        console.log('🛡️  Verificação periódica do Sistema Nuclear...');
         
-        // Obtém o serviço de permissões
-        const permissionsService = strapi.plugin('users-permissions').service('role');
-        
-        // Obtém o role "Public"
-        const publicRole = await permissionsService.findOne(2); // ID 2 = Public
+        // Verificar role Public
+        const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+          where: { type: 'public' }
+        });
         
         if (publicRole) {
           console.log('✅ Role Public encontrado');
           
-          // Lista de tipos de conteúdo para proteger
-          const conteudosParaProteger = [
-            'noticia', 'noticias',
-            'evento', 'eventos', 
-            'curso', 'cursos'
+          // Verificar permissões CRÍTICAS
+          const permissoesCriticas = [
+            'api::noticia.noticia.find',
+            'api::noticia.noticia.findOne',
+            'api::evento.evento.find',
+            'api::evento.evento.findOne', 
+            'api::curso.curso.find',
+            'api::curso.curso.findOne'
           ];
           
-          let alteracoes = false;
-          
-          // Para cada tipo de conteúdo, garante permissões
-          for (const contentType of conteudosParaProteger) {
-            const permissaoAtual = publicRole.permissions[`api::${contentType}.${contentType}`];
-            
-            if (!permissaoAtual || !permissaoAtual.controllers || 
-                !permissaoAtual.controllers.find || 
-                !permissaoAtual.controllers.findOne) {
-              
-              console.log(`🔧 Configurando permissões para ${contentType}...`);
-              
-              // Configura permissões básicas
-              if (!publicRole.permissions[`api::${contentType}.${contentType}`]) {
-                publicRole.permissions[`api::${contentType}.${contentType}`] = {};
+          for (const permissao of permissoesCriticas) {
+            const existe = await strapi.db.query('plugin::users-permissions.permission').findOne({
+              where: {
+                action: permissao,
+                role: publicRole.id
               }
-              
-              publicRole.permissions[`api::${contentType}.${contentType}`].controllers = {
-                find: { enabled: true },
-                findOne: { enabled: true }
-              };
-              
-              alteracoes = true;
+            });
+            
+            if (!existe) {
+              console.log(\🔧 Recriando permissão: \\);
+              await strapi.db.query('plugin::users-permissions.permission').create({
+                data: {
+                  action: permissao,
+                  role: publicRole.id
+                }
+              });
             }
           }
           
-          // Salva se houver alterações
-          if (alteracoes) {
-            await permissionsService.updateRole(2, {
-              permissions: publicRole.permissions
-            });
-            console.log('✅ Permissões públicas CONSOLIDADAS!');
-          } else {
-            console.log('✅ Permissões já configuradas corretamente');
-          }
-        }
-        
-      } catch (error) {
-        console.error('❌ Erro ao configurar permissões:', error.message);
-      }
-    };
-    
-    // 2. Função para publicar conteúdo automaticamente
-    const publicarConteudoAutomaticamente = async () => {
-      try {
-        console.log('📢 Verificando conteúdo não publicado...');
-        
-        // Tipos de conteúdo a verificar
-        const tiposConteudo = ['noticias', 'eventos', 'cursos'];
-        
-        for (const tipo of tiposConteudo) {
+          console.log('✅ Permissões públicas CONSOLIDADAS!');
+          
+          // Verificar conteúdo não publicado (OPCIONAL)
           try {
-            // Busca conteúdo não publicado
-            const conteudosNaoPublicados = await strapi.entityService.findMany(`api::${tipo}.${tipo}`, {
-              filters: { publicado: { $ne: true } },
-              limit: 50
-            });
-            
-            if (conteudosNaoPublicados && conteudosNaoPublicados.length > 0) {
-              console.log(`🔧 Publicando ${conteudosNaoPublicados.length} ${tipo} não publicados...`);
-              
-              // Publica cada um
-              for (const conteudo of conteudosNaoPublicados) {
-                await strapi.entityService.update(`api::${tipo}.${tipo}`, conteudo.id, {
-                  data: { publicado: true }
+            for (const colecao of ['noticia', 'evento', 'curso']) {
+              const model = strapi.getModel(\pi::\.\\);
+              if (model) {
+                const naoPublicados = await strapi.db.query(\pi::\.\\).count({
+                  where: { publicado: false }
                 });
+                if (naoPublicados > 0) {
+                  console.log(\📢 \: \ item(s) não publicado(s)\);
+                }
               }
-              
-              console.log(`✅ ${conteudosNaoPublicados.length} ${tipo} publicados automaticamente!`);
             }
           } catch (error) {
-            console.log(`⚠️ Tipo ${tipo} não encontrado ou erro:`, error.message);
+            // Ignora erros nesta parte
           }
+          
+        } else {
+          console.log('⚠️  Role Public NÃO encontrado! Recriando...');
+          await strapi.db.query('plugin::users-permissions.role').create({
+            data: {
+              name: 'Public',
+              type: 'public',
+              description: 'Default role given to unauthenticated user.'
+            }
+          });
         }
         
       } catch (error) {
-        console.error('❌ Erro ao publicar conteúdo:', error.message);
+        console.log('⚠️  Erro na verificação periódica:', error.message);
       }
-    };
+    }, 300000); // Verifica a cada 5 minutos (300000 ms)
     
-    // 3. Executa a proteção imediatamente
-    await garantirPermissoesPublicas();
-    await publicarConteudoAutomaticamente();
-    
-    console.log('✅ SISTEMA NUCLEAR INICIADO COM SUCESSO!');
-    console.log('🛡️  Seus dados estão PROTEGIDOS contra perda!');
-    
-    // 4. Configura verificação periódica (a cada 5 minutos)
-    setInterval(async () => {
-      console.log('⏰ Verificação periódica do Sistema Nuclear...');
-      await garantirPermissoesPublicas();
-      await publicarConteudoAutomaticamente();
-    }, 5 * 60 * 1000); // 5 minutos
-    
-    // 5. Endpoint de status do sistema
-    strapi.server.routes([
-      {
-        method: 'GET',
-        path: '/api/system/status',
-        handler: async (ctx) => {
-          ctx.send({
-            status: 'active',
-            system: 'nuclear-protection',
-            features: [
-              'auto-permissions',
-              'auto-publishing', 
-              'periodic-checks',
-              'survives-deploys'
-            ],
-            lastCheck: new Date().toISOString(),
-            message: 'Sistema Nuclear ativo - Dados protegidos 24/7'
-          });
-        },
-        config: { auth: false }
-      }
-    ]);
-    
-    console.log('🎉 Bootstrap completado com SISTEMA NUCLEAR!');
+    console.log('🎉 Sistema Nuclear ativado e corrigido!');
   },
 };
