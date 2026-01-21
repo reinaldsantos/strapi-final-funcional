@@ -1,7 +1,7 @@
 ﻿const { parse } = require('pg-connection-string');
 
 module.exports = ({ env }) => {
-  // SEMPRE usar PostgreSQL, NUNCA SQLite
+  // SEMPRE usar PostgreSQL no Render, NUNCA SQLite
   const config = parse(env('DATABASE_URL'));
   
   return {
