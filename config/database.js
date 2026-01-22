@@ -1,4 +1,4 @@
-﻿// config/database.js - PARA RENDER (POSTGRES)
+﻿// config/database.js - SIMPLES E SEGURO
 module.exports = ({ env }) => ({
   connection: {
     client: 'postgres',
