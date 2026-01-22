@@ -47,12 +47,6 @@ module.exports = [
   },
   'strapi::favicon',
   'strapi::public',
-  
-  // 🔥 🔥 🔥 ADICIONE ESTA PARTE NO FINAL 🔥 🔥 🔥
-  {
-    name: 'global::nuclear-protection',
-    config: {
-      enabled: true,
-    },
-  },
 ];
+
+// REMOVIDO: 'global::nuclear-protection' - middleware problem�tico que n�o existe
