@@ -47,12 +47,4 @@ module.exports = [
   },
   'strapi::favicon',
   'strapi::public',
-  
-  // ?? NOSSO MIDDLEWARE CUSTOMIZADO - FORÇA PERMISSÕES
-  {
-    name: 'global::force-permissions',
-    config: {
-      enabled: true,
-    },
-  },
 ];
