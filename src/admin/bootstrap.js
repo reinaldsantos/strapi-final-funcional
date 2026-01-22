@@ -1,77 +1,110 @@
 "use strict";
 
 module.exports = ({ strapi }) => {
-  // Sistema de permissões SEGURO e CORRETO
-  console.log("?? Configurando permissões públicas de forma segura...");
+  console.log("?????? ADMIN BOOTSTRAP INICIANDO - VERSÃO DEFINITIVA ??????");
   
-  const setupSafePermissions = async () => {
+  // Função que será chamada quando o admin estiver pronto
+  const setupPermissions = async () => {
+    console.log("?????? CONFIGURANDO PERMISSÕES PÚBLICAS...");
+    
     try {
       // 1. Encontrar role Public
+      console.log("?? Buscando role Public...");
       const publicRole = await strapi.db.query("plugin::users-permissions.role").findOne({
         where: { type: "public" }
       });
       
       if (!publicRole) {
-        console.error("? Role Public não encontrado");
+        console.error("??? Role Public não encontrado!");
         return;
       }
       
-      console.log("? Role Public encontrado");
+      console.log("??? Role Public encontrado! ID:", publicRole.id);
       
-      // 2. LISTA EXATA DOS SEUS CONTENT-TYPES
-      // Use os nomes SINGULARES como estão configurados
-      const yourContentTypes = [
-        "noticia",    // singular (como está no schema)
-        "evento",     // singular  
-        "curso"       // singular
+      // 2. Lista das SUAS coleções
+      const yourCollections = [
+        { singular: "noticia", plural: "noticias" },
+        { singular: "evento", plural: "eventos" },
+        { singular: "curso", plural: "cursos" }
       ];
       
-      console.log("?? Configurando para:", yourContentTypes.join(", "));
+      console.log("?????? Suas coleções:", yourCollections.map(c => c.singular).join(", "));
       
-      // 3. Configurar cada content-type
-      for (const contentType of yourContentTypes) {
-        console.log(`   ?? ${contentType}...`);
+      // 3. Para CADA coleção, garantir permissões
+      for (const collection of yourCollections) {
+        console.log(`\n?? Processando: ${collection.singular} ? /api/${collection.plural}`);
         
-        // Ações necessárias para APIs públicas
-        const requiredActions = ["find", "findOne"];
-        
-        for (const action of requiredActions) {
-          // Verificar se permissão já existe
-          const actionName = `api::${contentType}.${contentType}.${action}`;
+        try {
+          // Verificar se content-type existe
+          const contentType = strapi.contentType(`api::${collection.singular}.${collection.singular}`);
+          console.log(`   ? Content-type encontrado no sistema`);
           
-          const existing = await strapi.db.query("plugin::users-permissions.permission").findOne({
-            where: {
-              role: publicRole.id,
-              action: actionName
-            }
-          });
+          // Criar permissões find e findOne
+          const actions = ["find", "findOne"];
+          let createdCount = 0;
           
-          if (!existing) {
-            // Criar permissão
-            await strapi.db.query("plugin::users-permissions.permission").create({
-              data: {
-                action: actionName,
-                role: publicRole.id
+          for (const action of actions) {
+            const actionName = `api::${collection.singular}.${collection.singular}.${action}`;
+            
+            // Verificar se já existe
+            const exists = await strapi.db.query("plugin::users-permissions.permission").findOne({
+              where: {
+                role: publicRole.id,
+                action: actionName
               }
             });
-            console.log(`      ? ${action} criada`);
-          } else {
-            console.log(`      ?? ${action} já existe`);
+            
+            if (!exists) {
+              console.log(`   ? Criando permissão: ${action}`);
+              await strapi.db.query("plugin::users-permissions.permission").create({
+                data: {
+                  action: actionName,
+                  role: publicRole.id
+                }
+              });
+              createdCount++;
+              console.log(`   ? Permissão ${action} criada!`);
+            } else {
+              console.log(`   ?? Permissão ${action} já existe`);
+            }
           }
+          
+          if (createdCount > 0) {
+            console.log(`   ?? ${createdCount} permissões criadas para ${collection.singular}`);
+          }
+          
+        } catch (error) {
+          console.log(`   ? Erro com ${collection.singular}:`, error.message);
         }
       }
       
-      console.log("?? PERMISSÕES CONFIGURADAS COM SUCESSO!");
-      console.log("?? Suas publicações NÃO vão mais sumir!");
+      console.log("\n?????? PERMISSÕES CONFIGURADAS COM SUCESSO! ??????");
+      console.log("?????? Agora as APIs DEVEM funcionar!");
+      console.log("\n?????? URLs para teste:");
+      console.log("   • https://strapi-final-funcional.onrender.com/api/noticias");
+      console.log("   • https://strapi-final-funcional.onrender.com/api/eventos");
+      console.log("   • https://strapi-final-funcional.onrender.com/api/cursos");
+      console.log("\n?????? Dica: Aguarde 30 segundos após este log aparecer.");
       
     } catch (error) {
-      console.error("? Erro:", error.message);
+      console.error("??? ERRO NO BOOTSTRAP:", error.message);
+      console.error("Stack:", error.stack);
     }
   };
   
-  // Executar quando o admin estiver pronto
+  // IMPORTANTE: Executar quando o ADMIN estiver pronto
   strapi.app.on("adminReady", () => {
-    console.log("?? Admin pronto, configurando permissões...");
-    setTimeout(setupSafePermissions, 2000);
+    console.log("?????? Admin pronto! Executando bootstrap em 5 segundos...");
+    
+    setTimeout(() => {
+      console.log("?????? Executando configuração de permissões AGORA...");
+      setupPermissions();
+    }, 5000);
   });
+  
+  // Backup: também executar após 60 segundos
+  setTimeout(() => {
+    console.log("??? Execução de backup após 60 segundos...");
+    setupPermissions();
+  }, 60000);
 };
