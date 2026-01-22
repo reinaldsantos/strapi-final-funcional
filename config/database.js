@@ -1,4 +1,4 @@
-﻿// config/database.js - SIMPLES E SEGURO
+﻿// config/database.js - BLOQUEIA MIGRAÇÕES COMPLETAMENTE
 module.exports = ({ env }) => ({
   connection: {
     client: 'postgres',
@@ -7,5 +7,9 @@ module.exports = ({ env }) => ({
       ssl: { rejectUnauthorized: false },
     },
     pool: { min: 0, max: 5 },
+    acquireConnectionTimeout: 600000,
+    migrations: {
+      enabled: false,  // ← DESLIGA MIGRAÇÕES
+    },
   },
 });
