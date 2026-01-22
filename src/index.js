@@ -1,10 +1,15 @@
-ï»¿// src/index.js - TOTALMENTE VAZIO, SEM CÃ“DIGO CUSTOMIZADO
 "use strict";
 
-module.exports = {
-  async bootstrap({ strapi }) {
-    console.log("âœ… Strapi iniciado - SEM cÃ³digo bugado");
-    // ABSOLUTAMENTE NADA AQUI!
-    // Deixe o Strapi funcionar sozinho
-  }
+module.exports = ({ strapi }) => {
+  // Código vazio ou mínimo - as permissões são configuradas no admin/bootstrap.js
+  console.log("?? Strapi iniciado com configuração estável");
+  
+  // Apenas verificar se está rodando
+  strapi.server.on("listening", () => {
+    console.log("? Servidor pronto na porta", strapi.config.get("server.port"));
+    console.log("?? APIs públicas disponíveis:");
+    console.log("   /api/noticias");
+    console.log("   /api/eventos");  
+    console.log("   /api/cursos");
+  });
 };
