@@ -1,13 +1,14 @@
 ﻿"use strict";
 
 module.exports = ({ strapi }) => {
-  console.log("🚀 BOOTSTRAP DO RENDER - Strapi v4");
+  console.log("🚀 BOOTSTRAP DO RENDER - Configuração automática");
 
   const setupPermissions = async () => {
     try {
-      console.log("🔧 Configurando permissões públicas...");
-
-      // 1. Encontrar role Public
+      console.log("⏳ Aguardando Strapi carregar completamente...");
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      
+      console.log("🔍 Buscando role Public...");
       const publicRole = await strapi.db.query("plugin::users-permissions.role").findOne({
         where: { type: "public" }
       });
@@ -18,96 +19,58 @@ module.exports = ({ strapi }) => {
       }
 
       console.log(`✅ Role Public encontrado (ID: ${publicRole.id})`);
-
-      // 2. Listar TODOS os conteúdos disponíveis
-      const contentTypes = strapi.contentTypes;
-      console.log("\n📋 Todos os Content Types disponíveis:");
       
-      const apiContentTypes = [];
+      // Lista de coleções
+      const collections = ["noticia", "evento", "curso"];
       
-      for (const contentType in contentTypes) {
-        if (contentType.startsWith("api::")) {
-          console.log(`   • ${contentType}`);
-          apiContentTypes.push(contentType);
-        }
-      }
-
-      // 3. Coleções específicas que você quer configurar
-      const yourCollections = [
-        "noticia",
-        "evento", 
-        "curso"
-      ];
-
-      console.log("\n🎯 Configurando suas coleções:");
-
-      for (const collectionName of yourCollections) {
-        const contentType = `api::${collectionName}.${collectionName}`;
+      console.log("🎯 Configurando permissões para:", collections.join(", "));
+      
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const collectionName of collections) {
+        console.log(`\n📝 ${collectionName}:`);
         
-        if (!apiContentTypes.includes(contentType)) {
-          console.log(`❌ ${collectionName}: Content Type não encontrado!`);
-          continue;
-        }
-
-        console.log(`\n🔧 ${collectionName}:`);
+        const actions = ["find", "findOne"];
         
-        // Permissões básicas para API pública
-        const permissions = [
-          {
-            action: `${contentType}.find`,
-            enabled: true
-          },
-          {
-            action: `${contentType}.findOne`,
-            enabled: true
-          }
-        ];
-
-        // Verificar e criar permissões
-        for (const perm of permissions) {
+        for (const action of actions) {
+          const actionName = `api::${collectionName}.${collectionName}.${action}`;
+          
           try {
-            // Verificar se já existe
-            const existing = await strapi.db.query("plugin::users-permissions.permission").findOne({
-              where: {
-                role: publicRole.id,
-                action: perm.action
-              }
-            });
-
-            if (!existing) {
-              await strapi.db.query("plugin::users-permissions.permission").create({
-                data: {
-                  action: perm.action,
-                  role: publicRole.id
-                }
-              });
-              console.log(`   ✅ ${perm.action.split(".").pop()} - CRIADA`);
-            } else {
-              console.log(`   ⏭️ ${perm.action.split(".").pop()} - Já existe`);
-            }
+            // Método DIRETO no banco (funciona sempre)
+            await strapi.db.connection.raw(`
+              INSERT INTO up_permissions (action, role_id, created_at, updated_at)
+              VALUES (?, ?, NOW(), NOW())
+              ON CONFLICT (action, role_id) DO NOTHING
+            `, [actionName, publicRole.id]);
+            
+            console.log(`   ✅ ${action} - Configurada`);
+            successCount++;
           } catch (error) {
-            console.log(`   ❌ ${perm.action.split(".").pop()} - Erro: ${error.message}`);
+            console.log(`   ❌ ${action} - ${error.message}`);
+            errorCount++;
           }
         }
       }
-
-      console.log("\n🎉 CONFIGURAÇÃO COMPLETA!");
-      console.log("\n📡 APIs públicas disponíveis:");
-      console.log("   • GET /api/noticias");
-      console.log("   • GET /api/noticias/:id");
-      console.log("   • GET /api/eventos");
-      console.log("   • GET /api/eventos/:id");
-      console.log("   • GET /api/cursos");
-      console.log("   • GET /api/cursos/:id");
-
+      
+      console.log(`\n📊 RESULTADO: ${successCount} ok, ${errorCount} erros`);
+      
+      if (successCount > 0) {
+        console.log("🎉 PERMISSÕES CONFIGURADAS COM SUCESSO!");
+        console.log("\n🌐 APIs públicas agora disponíveis:");
+        console.log("   • GET https://strapi-escola-final.onrender.com/api/noticias");
+        console.log("   • GET https://strapi-escola-final.onrender.com/api/eventos");
+        console.log("   • GET https://strapi-escola-final.onrender.com/api/cursos");
+      } else {
+        console.log("⚠️  Nenhuma permissão pôde ser configurada.");
+        console.log("💡 Tente criar uma entrada em cada coleção no Admin.");
+      }
+      
     } catch (error) {
-      console.error("❌ Erro crítico:", error);
+      console.error("❌ Erro crítico:", error.message);
     }
   };
 
-  // Executar quando o Strapi estiver pronto
-  setTimeout(() => {
-    console.log("⏳ Iniciando configuração automática...");
-    setupPermissions();
-  }, 5000);
+  // Executar após o Strapi iniciar
+  setTimeout(setupPermissions, 15000);
 };
