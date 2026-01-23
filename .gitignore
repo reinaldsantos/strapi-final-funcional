@@ -71,3 +71,12 @@ quick-check.js
 reset-*.js
 simple-*.js
 test-*.js
+
+# Arquivos de teste e debug (NUNCA subir)
+*.js
+!src/**/*.js
+!config/**/*.js
+
+# Arquivos específicos que não devem ser commitados
+.strapi/
+.tmp/
