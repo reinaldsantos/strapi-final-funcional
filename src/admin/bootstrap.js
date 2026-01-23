@@ -1,158 +1,113 @@
-"use strict";
+Ôªø"use strict";
 
 module.exports = ({ strapi }) => {
-  console.log("?????? ADMIN BOOTSTRAP DEFINITIVO INICIANDO ??????");
-  console.log("??", new Date().toISOString());
-  console.log("?? Ambiente:", process.env.NODE_ENV || "development");
+  console.log("üöÄ BOOTSTRAP DO RENDER - Strapi v4");
 
-  // FunÁ„o PRINCIPAL que configura TUDO
-  const setupEverything = async () => {
-    console.log("\n?????? INICIANDO CONFIGURA«√O COMPLETA...");
-
+  const setupPermissions = async () => {
     try {
-      // 1. Encontrar ou criar role Public
-      console.log("1??  Buscando role Public...");
-      let publicRole = await strapi.db.query("plugin::users-permissions.role").findOne({
+      console.log("üîß Configurando permiss√µes p√∫blicas...");
+
+      // 1. Encontrar role Public
+      const publicRole = await strapi.db.query("plugin::users-permissions.role").findOne({
         where: { type: "public" }
       });
 
       if (!publicRole) {
-        console.log("   ??  Role Public n„o encontrado, tentando criar...");
-        try {
-          publicRole = await strapi.db.query("plugin::users-permissions.role").create({
-            data: {
-              name: "Public",
-              description: "Default role for unauthenticated users",
-              type: "public"
-            }
-          });
-          console.log("   ? Role Public criado! ID:", publicRole.id);
-        } catch (createError) {
-          console.error("   ? N„o foi possÌvel criar role:", createError.message);
-          return;
-        }
-      } else {
-        console.log("   ? Role Public encontrado! ID:", publicRole.id);
+        console.error("‚ùå Role Public n√£o encontrado!");
+        return;
       }
 
-      // 2. Lista das SUAS coleÁıes (CONFIRMADAS)
+      console.log(`‚úÖ Role Public encontrado (ID: ${publicRole.id})`);
+
+      // 2. Listar TODOS os conte√∫dos dispon√≠veis
+      const contentTypes = strapi.contentTypes;
+      console.log("\nüìã Todos os Content Types dispon√≠veis:");
+      
+      const apiContentTypes = [];
+      
+      for (const contentType in contentTypes) {
+        if (contentType.startsWith("api::")) {
+          console.log(`   ‚Ä¢ ${contentType}`);
+          apiContentTypes.push(contentType);
+        }
+      }
+
+      // 3. Cole√ß√µes espec√≠ficas que voc√™ quer configurar
       const yourCollections = [
-        { singular: "noticia", plural: "noticias", display: "NotÌcias" },
-        { singular: "evento", plural: "eventos", display: "Eventos" },
-        { singular: "curso", plural: "cursos", display: "Cursos" }
+        "noticia",
+        "evento", 
+        "curso"
       ];
 
-      console.log(`\n2??  Configurando ${yourCollections.length} coleÁıes...`);
-      console.log("   ?? ColeÁıes:", yourCollections.map(c => c.display).join(", "));
-      
-      let totalPermissionsCreated = 0;
-      let totalPermissionsExist = 0;
+      console.log("\nüéØ Configurando suas cole√ß√µes:");
 
-      // 3. Para CADA coleÁ„o, garantir permissıes
-      for (const collection of yourCollections) {
-        console.log(`\n   ?? ${collection.display} (${collection.singular}):`);
-        console.log(`      API: /api/${collection.plural}`);
+      for (const collectionName of yourCollections) {
+        const contentType = `api::${collectionName}.${collectionName}`;
+        
+        if (!apiContentTypes.includes(contentType)) {
+          console.log(`‚ùå ${collectionName}: Content Type n√£o encontrado!`);
+          continue;
+        }
 
-        try {
-          // Verificar se content-type existe no sistema
-          let contentType;
-          try {
-            contentType = strapi.contentType(`api::${collection.singular}.${collection.singular}`);
-            console.log(`      ? Content-type registrado no Strapi`);
-          } catch (ctError) {
-            console.log(`      ? Content-type n„o encontrado:`, ctError.message);
-            continue; // Pular para prÛxima coleÁ„o
+        console.log(`\nüîß ${collectionName}:`);
+        
+        // Permiss√µes b√°sicas para API p√∫blica
+        const permissions = [
+          {
+            action: `${contentType}.find`,
+            enabled: true
+          },
+          {
+            action: `${contentType}.findOne`,
+            enabled: true
           }
+        ];
 
-          // AÁıes necess·rias para API p˙blica
-          const requiredActions = ["find", "findOne"];
-
-          for (const action of requiredActions) {
-            const actionName = `api::${collection.singular}.${collection.singular}.${action}`;
-            
-            // Verificar se permiss„o j· existe
-            const existingPermission = await strapi.db.query("plugin::users-permissions.permission").findOne({
+        // Verificar e criar permiss√µes
+        for (const perm of permissions) {
+          try {
+            // Verificar se j√° existe
+            const existing = await strapi.db.query("plugin::users-permissions.permission").findOne({
               where: {
                 role: publicRole.id,
-                action: actionName
+                action: perm.action
               }
             });
 
-            if (!existingPermission) {
-              // CRIAR permiss„o
+            if (!existing) {
               await strapi.db.query("plugin::users-permissions.permission").create({
                 data: {
-                  action: actionName,
+                  action: perm.action,
                   role: publicRole.id
                 }
               });
-              console.log(`      ? ${action} ? CRIADA`);
-              totalPermissionsCreated++;
+              console.log(`   ‚úÖ ${perm.action.split(".").pop()} - CRIADA`);
             } else {
-              console.log(`      ? ${action} ? J¡ EXISTE`);
-              totalPermissionsExist++;
+              console.log(`   ‚è≠Ô∏è ${perm.action.split(".").pop()} - J√° existe`);
             }
+          } catch (error) {
+            console.log(`   ‚ùå ${perm.action.split(".").pop()} - Erro: ${error.message}`);
           }
-
-        } catch (error) {
-          console.log(`      ? Erro com ${collection.singular}:`, error.message);
         }
       }
 
-      // 4. RESUMO FINAL
-      console.log("\n" + "=" .repeat(50));
-      console.log("?????? RESUMO DA CONFIGURA«√O ??????");
-      console.log("=" .repeat(50));
-      console.log(`   ???  Role Public: ID ${publicRole.id}`);
-      console.log(`   ?? ColeÁıes processadas: ${yourCollections.length}`);
-      console.log(`   ? Permissıes existentes: ${totalPermissionsExist}`);
-      console.log(`   ? Novas permissıes criadas: ${totalPermissionsCreated}`);
-      console.log(`   ?? Total permissıes: ${totalPermissionsExist + totalPermissionsCreated}`);
-      
-      const expectedTotal = yourCollections.length * 2; // 2 aÁıes por coleÁ„o
-      const currentTotal = totalPermissionsExist + totalPermissionsCreated;
-      
-      if (currentTotal >= expectedTotal) {
-        console.log("\n?????? CONFIGURA«√O COMPLETA COM SUCESSO! ??????");
-        console.log("?????? Todas APIs DEVEM funcionar agora!");
-      } else {
-        console.log(`\n??  Permissıes incompletas: ${currentTotal}/${expectedTotal}`);
-        console.log("?? Execute este bootstrap novamente apÛs alguns segundos");
-      }
-      
-      console.log("\n?? URLs para teste (aguarde 30 segundos):");
-      console.log(`   ï https://strapi-final-funcional.onrender.com/api/noticias`);
-      console.log(`   ï https://strapi-final-funcional.onrender.com/api/eventos`);
-      console.log(`   ï https://strapi-final-funcional.onrender.com/api/cursos`);
-      console.log(`   ï https://strapi-final-funcional.onrender.com/admin`);
+      console.log("\nüéâ CONFIGURA√á√ÉO COMPLETA!");
+      console.log("\nüì° APIs p√∫blicas dispon√≠veis:");
+      console.log("   ‚Ä¢ GET /api/noticias");
+      console.log("   ‚Ä¢ GET /api/noticias/:id");
+      console.log("   ‚Ä¢ GET /api/eventos");
+      console.log("   ‚Ä¢ GET /api/eventos/:id");
+      console.log("   ‚Ä¢ GET /api/cursos");
+      console.log("   ‚Ä¢ GET /api/cursos/:id");
 
     } catch (error) {
-      console.error("\n??? ERRO CRÕTICO NO BOOTSTRAP:", error.message);
-      console.error("Stack:", error.stack);
+      console.error("‚ùå Erro cr√≠tico:", error);
     }
   };
 
-  // ESTRAT…GIA DE EXECU«√O INTELIGENTE
-  console.log("\n??  EstratÈgia de execuÁ„o configurada:");
-  
-  // 1. ExecuÁ„o IMEDIATA (3 segundos)
-  console.log("1??  ExecuÁ„o imediata em 3 segundos...");
+  // Executar quando o Strapi estiver pronto
   setTimeout(() => {
-    console.log("   ?? Executando configuraÁ„o AGORA...");
-    setupEverything();
-  }, 3000);
-
-  // 2. Backup (30 segundos) - caso a primeira falhe
-  setTimeout(() => {
-    console.log("2??  ExecuÁ„o de backup em 30 segundos...");
-    setupEverything();
-  }, 30000);
-  
-  // 3. PeriÛdico (2 minutos) - para garantir
-  setInterval(() => {
-    console.log("3??  VerificaÁ„o periÛdica (2 minutos)...");
-    setupEverything();
-  }, 120000);
-  
-  console.log("\n? Bootstrap DEFINITIVO configurado com sucesso!");
+    console.log("‚è≥ Iniciando configura√ß√£o autom√°tica...");
+    setupPermissions();
+  }, 5000);
 };
