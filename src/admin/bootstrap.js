@@ -1,4 +1,8 @@
-﻿// Último deploy: 2026-01-23 10:17:57
+﻿// Deploy: 2026-01-23 10:27:44
+
+// Último deploy: 2026-01-23 10:26:57
+
+// Último deploy: 2026-01-23 10:17:57
 "use strict";
 
 module.exports = ({ strapi }) => {
@@ -141,4 +145,6 @@ module.exports = ({ strapi }) => {
   console.log("⏰ Configuração automática em 20 segundos...");
   setTimeout(setupPermissions, 20000);
 };
+
+
 
