@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿// Último deploy: 2026-01-23 10:17:57
+"use strict";
 
 module.exports = ({ strapi }) => {
   console.log("🚀 BOOTSTRAP ULTIMATE - Free Render Solution");
@@ -140,3 +141,4 @@ module.exports = ({ strapi }) => {
   console.log("⏰ Configuração automática em 20 segundos...");
   setTimeout(setupPermissions, 20000);
 };
+
